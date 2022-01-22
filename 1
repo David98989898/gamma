@@ -1,0 +1,47 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import csv
+import pymedphys
+import pandas as pd
+
+df = pd.ExcelFile(r'C:...').parse('Blad1') 
+x=[]
+x.append(df['x-axel'])
+xc= pd.concat(x)
+#print(xc[0:43])
+#axes_evaluation=tuple(xc)
+y = []
+y.append(df['D_Rel'])
+Dc = pd.concat(y)
+
+z = []
+z.append(df['x-ax'])
+xm = pd.concat(z)
+#axes_reference= tuple(xm)
+
+w = []
+w.append(df['D_rel'])
+Dm = pd.concat(w)
+
+
+axis_reference = tuple(xm)
+dose_reference = np.array(Dm)
+
+axis_evaluation = tuple(xc[0:43])
+dose_evaluation = np.array(Dc[0:43])
+gamma_options = {
+    'dose_percent_threshold': 1,
+    'distance_mm_threshold': 1,
+    'lower_percent_dose_cutoff': 10,
+    'interp_fraction': 10,  # Should be 10 or more for more accurate results
+    'max_gamma': 2,
+    'random_subset': None,
+    'local_gamma': False, # False indicates global gamma is calculated
+    'ram_available': 2 ** 29  # 1/2 GB
+}
+#for global dose normalization, the maximum reference dose is used
+#but in TG218, it said usually the prescribed dose or the maximum dose in a plan (evaluation) is used
+gamma = pymedphys.gamma(
+    axis_reference, dose_reference,
+    axis_evaluation, dose_evaluation,
+    **gamma_options)
